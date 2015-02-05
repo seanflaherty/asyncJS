@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="node_modules/rx/dist/rx.js"></script>
+    <script src="node_modules/rx/dist/rx.async.js"></script>
+    <script src="node_modules/rx/dist/rx.binding.js"></script>
+    <script src="node_modules/rx/dist/rx.time.js"></script>
+
+
+  <meta charset="utf-8">
+  <title>JS Bin</title>
+</head>
+<body>
+
+    <div id="parent" style="width:200px; height:200px; background-color:red">
+      <div id="widget" style="position:absolute;width:150px;background-color:blue;color:white">Drag me</div>
+  </div>
+
+  <script>
+  var Observable = Rx.Observable;
+
+var parent = document.getElementById("parent");
+var widget = document.getElementById("widget");
+
+var mouseDowns = Observable.fromEvent(widget, "mousedown");
+var parentMouseMoves = Observable.fromEvent(parent, "mousemove");
+var parentMouseUps = Observable.fromEvent(parent, "mouseup");
+
+// var stocks =
+//   exchanges.
+//     map(function(exchange) {
+//       return exchange.stocks.
+//         filter(function(stock) { return stock.price >= 100.00; });
+//     }).
+//     concatAll();
+
+var drags =
+  mouseDowns.
+    map(function(e) {
+      return parentMouseMoves.
+        takeUntil(parentMouseUps);
+    }).
+    concatAll();
+
+var subscription =
+  drags.forEach(
+    function onNext(e) {
+      widget.style.left = e.clientX + "px";
+      widget.style.top = e.clientY + "px";
+    },
+    function onError(error) {
+      console.log('error');
+    },
+    function onCompleted() {
+
+    });
+    </script>
+</body>
+</html>
